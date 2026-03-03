@@ -1,3 +1,8 @@
+---
+layout: default
+title: Early-Game Advantage and Win Prediction
+---
+
 # Early-Game Advantage and Win Prediction in Professional League of Legends
 
 **Tristan Roman - David Lightfoot - Timothy Chang - Julia Klayman**
