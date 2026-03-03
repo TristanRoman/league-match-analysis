@@ -40,6 +40,7 @@ Result: Statistically significant → early gold advantage strongly predicts win
   height="600"
   frameborder="0"
 ></iframe>
+
 ---
 
 ## Framing a Prediction Problem
