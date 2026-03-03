@@ -1,7 +1,3 @@
----
-layout: default
-title: Early-Game Advantage and Win Prediction
----
 
 # Early-Game Advantage and Win Prediction in Professional League of Legends
 
@@ -38,13 +34,6 @@ Result: p ≈ 0.18 → fail to reject the null.
 
 Null: Teams with above-median gold difference at 10 minutes do not have higher winrates.  
 Result: Statistically significant → early gold advantage strongly predicts win probability.
-
-<iframe
-  src="assets/gold_diff_plot.html"
-  width="800"
-  height="600"
-  frameborder="0"
-></iframe>
 
 ---
 
