@@ -291,4 +291,4 @@ Our analysis demonstrates that the early state of a professional League of Legen
 
 However, the strongest predictive performance emerges when we incorporate additional strategic context. Engineered summaries of combat efficiency, indicators of early objective control, and champion composition together provide a richer representation of early-game dynamics.
 
-These results reinforce a widely held competitive intuition. Victories in professional League of Legends rarely emerge from a single decisive moment late in the match. Instead, they typically arise from a sequence of advantages that begin much earlier, defined by the strategic accumulation of gold, experience, and map control during the opening minutes of the game.**
+These results reinforce a widely held competitive intuition. Victories in professional League of Legends rarely emerge from a single decisive moment late in the match. **Instead, they typically arise from a sequence of advantages that begin much earlier, defined by the strategic accumulation of gold, experience, and map control during the opening minutes of the game.**
