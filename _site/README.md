@@ -129,8 +129,8 @@ To summarize early-match performance numerically, we grouped observations by tea
 
 | Side | Avg Gold @10 | Avg XP @10 | Avg CS @10 | Avg Gold Diff @10 | Avg KDA10 |
 |------|-------------:|-----------:|-----------:|------------------:|----------:|
-| Blue |    15736.5   |  18222     |   315.36   |             85.58 |    2.21   |
-| Red  |    15651     |  18198.4   |   315.01   |            -85.58 |    2.1    |
+| Blue |    15,736.5  |  18,222    |   315.36   |             85.58 |    2.21   |
+| Red  |    15,651    |  18,198.4  |   315.01   |            -85.58 |    2.1    |
 
 These aggregates complement the visual analysis by providing concise numerical summaries of early-game performance.
 
