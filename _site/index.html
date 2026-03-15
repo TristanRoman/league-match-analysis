@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Early-Match Advantage and Win Prediction in Professional League of Legends | Early-Game Advantage and Win Prediction in Professional League of Legends</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Early-Match Advantage and Win Prediction in Professional League of Legends" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="http://localhost:4000/" />
+<meta property="og:url" content="http://localhost:4000/" />
+<meta property="og:site_name" content="Early-Game Advantage and Win Prediction in Professional League of Legends" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Early-Match Advantage and Win Prediction in Professional League of Legends" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","headline":"Early-Match Advantage and Win Prediction in Professional League of Legends","name":"Early-Game Advantage and Win Prediction in Professional League of Legends","url":"http://localhost:4000/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" as="style" type="text/css" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Early-Match Advantage and Win Prediction in Professional League of Legends</h1>
+      <h2 class="project-tagline"></h2>
+      
+      
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      
+<h1 id="early-match-advantage-and-win-prediction-in-professional-league-of-legends">Early-Match Advantage and Win Prediction in Professional League of Legends</h1>
+
+<p><strong>DSC 259R Final Project – UC San Diego</strong><br />
+Tristan Roman · David Lightfoot · Timothy Chang · Julia Klayman</p>
+
+<p>Professional <em>League of Legends</em> is a game defined by momentum. Small advantages in gold, experience, and map control during the opening minutes often cascade into larger strategic advantages that determine the outcome of a match. Analysts and commentators frequently claim that games are “decided early,” but this statement is usually made qualitatively rather than supported with systematic evidence.</p>
+
+<p>This project investigates that claim quantitatively using professional esports data. Our goal is to determine whether information available early in a match — such as gold, experience, farming efficiency, combat activity, and objective control — already contains enough signal to predict which team will ultimately win.</p>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#introduction">Introduction</a></li>
+  <li><a href="#data-cleaning-and-exploratory-data-analysis">Data Cleaning and Exploratory Data Analysis</a></li>
+  <li><a href="#assessment-of-missingness">Assessment of Missingness</a></li>
+  <li><a href="#hypothesis-testing">Hypothesis Testing</a></li>
+  <li><a href="#framing-a-prediction-problem">Framing a Prediction Problem</a></li>
+  <li><a href="#baseline-model">Baseline Model</a></li>
+  <li><a href="#final-model">Final Model</a></li>
+  <li><a href="#fairness-analysis">Fairness Analysis</a></li>
+  <li><a href="#conclusion">Conclusion</a></li>
+</ul>
+
+<hr />
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Our central research question is:</p>
+
+<p><strong>To what extent can the early state of a professional League of Legends match explain or predict its eventual outcome?</strong></p>
+
+<p>To investigate this question, we use the <strong>2022 Oracle’s Elixir professional esports dataset</strong>, which contains detailed records of professional matches played across major global leagues.</p>
+
+<p>The raw dataset includes both player-level and team-level rows. For this project, we transform the data so that each observation represents <strong>one team in one match</strong>, allowing us to frame the analysis as a predictive modeling problem.</p>
+
+<p>The response variable is <strong>result</strong>, where:</p>
+
+<ul>
+  <li>1 = win</li>
+  <li>0 = loss</li>
+</ul>
+
+<p>Key early-match statistics include:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">goldat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">xpat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">csat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">killsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">assistsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">deathsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">golddiffat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">xpdiffat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">csdiffat10</code></li>
+</ul>
+
+<p>We also incorporate contextual signals including:</p>
+
+<ul>
+  <li>early objective control (<code class="language-plaintext highlighter-rouge">firstblood</code>, <code class="language-plaintext highlighter-rouge">firstdragon</code>, <code class="language-plaintext highlighter-rouge">firstherald</code>, <code class="language-plaintext highlighter-rouge">firsttower</code>)</li>
+  <li>champion composition for each role</li>
+</ul>
+
+<p>Our analysis progresses through three stages:</p>
+
+<ol>
+  <li>Exploratory analysis to understand early-match patterns</li>
+  <li>Hypothesis testing to evaluate statistical relationships suggested by those patterns</li>
+  <li>Predictive modeling to quantify how well early-match information predicts match outcomes</li>
+</ol>
+
+<p>This progression allows us to connect descriptive statistics, inferential testing, and machine learning into a single coherent analysis.</p>
+
+<hr />
+
+<h2 id="data-cleaning-and-exploratory-data-analysis">Data Cleaning and Exploratory Data Analysis</h2>
+
+<h3 id="data-cleaning">Data Cleaning</h3>
+
+<p>The Oracle’s Elixir dataset contains mixed row types including player rows, team rows, and incomplete matches. Because our prediction task focuses on <strong>team outcomes</strong>, the first step was transforming the dataset into a consistent team-level structure.</p>
+
+<p>We filtered the dataset to matches played in <strong>2022</strong> and retained only rows where <code class="language-plaintext highlighter-rouge">datacompleteness == "complete"</code>.</p>
+
+<p>This removed partially recorded matches that could distort later analysis.</p>
+
+<p>Next, we restricted the dataset to the five competitive roles:</p>
+
+<ul>
+  <li>top</li>
+  <li>jungle</li>
+  <li>mid</li>
+  <li>bot</li>
+  <li>support</li>
+</ul>
+
+<p>Player rows were then aggregated into team-level observations, ensuring that each match contributes exactly two rows, one per team.</p>
+
+<p>To capture additional structure in early gameplay, we engineered several derived features:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kda10</code> — early combat efficiency</li>
+  <li><code class="language-plaintext highlighter-rouge">gold_per_cs10</code> — economic efficiency</li>
+  <li><code class="language-plaintext highlighter-rouge">combat_intensity10</code> — overall skirmish activity</li>
+</ul>
+
+<p>We also incorporated additional signals describing objective control and champion composition.</p>
+
+<p>These features capture both mechanical performance and strategic context during the opening stages of the match.</p>
+
+<h3 id="univariate-analysis">Univariate Analysis</h3>
+
+<p>We first examined the distribution of gold difference at 10 minutes (<code class="language-plaintext highlighter-rouge">golddiffat10</code>), a widely cited indicator of early advantage.</p>
+
+<iframe src="assets/gold_diff_distribution.html" width="100%" height="500"></iframe>
+
+<p>The distribution shows substantial variation in early economic states across matches, indicating that teams reach the 10-minute mark with a wide range of competitive positions.</p>
+
+<p>We also examined the distribution of early combat efficiency (<code class="language-plaintext highlighter-rouge">kda10</code>).</p>
+
+<iframe src="assets/kda_distribution.html" width="100%" height="500"></iframe>
+
+<p>This visualization highlights the variability in teams’ ability to convert early fights into favorable outcomes.</p>
+
+<h3 id="bivariate-analysis">Bivariate Analysis</h3>
+
+<p>Next, we examined how early-match statistics relate to match outcomes.</p>
+
+<iframe src="assets/gold_vs_result.html" width="100%" height="500"></iframe>
+
+<p>Teams that eventually win tend to hold stronger gold positions at the 10-minute mark. This visual separation suggests that early economic advantage may be strongly associated with match outcomes.</p>
+
+<p>We also examined the most frequently played botlane champions.</p>
+
+<iframe src="assets/botlane_top10.html" width="100%" height="500"></iframe>
+
+<p>This visualization highlights the competitive meta and helped identify champions with sufficient sample sizes for hypothesis testing.</p>
+
+<h3 id="interesting-aggregates">Interesting Aggregates</h3>
+
+<p>To summarize early-match performance numerically, we grouped observations by team side and computed average statistics.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Side</th>
+      <th style="text-align: right">Avg Gold @10</th>
+      <th style="text-align: right">Avg XP @10</th>
+      <th style="text-align: right">Avg CS @10</th>
+      <th style="text-align: right">Avg Gold Diff @10</th>
+      <th style="text-align: right">Avg KDA10</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Blue</td>
+      <td style="text-align: right">15736.5</td>
+      <td style="text-align: right">18222</td>
+      <td style="text-align: right">315.36</td>
+      <td style="text-align: right">85.58</td>
+      <td style="text-align: right">2.21</td>
+    </tr>
+    <tr>
+      <td>Red</td>
+      <td style="text-align: right">15651</td>
+      <td style="text-align: right">18198.4</td>
+      <td style="text-align: right">315.01</td>
+      <td style="text-align: right">-85.58</td>
+      <td style="text-align: right">2.1</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These aggregates complement the visual analysis by providing concise numerical summaries of early-game performance.</p>
+
+<hr />
+
+<h2 id="assessment-of-missingness">Assessment of Missingness</h2>
+
+<p>We analyzed missingness using the raw dataset, since filtering to complete matches would hide the underlying missingness structure.</p>
+
+<p>A plausible candidate for missingness is the later-game variable <strong><code class="language-plaintext highlighter-rouge">goldat25</code></strong>, which may be unavailable when matches end early.</p>
+
+<p>First, we tested whether missingness depends on match outcome.</p>
+
+<iframe src="assets/missingness_perm_test.html" width="100%" height="500"></iframe>
+
+<p>The permutation test produced a <strong>p-value of 1.0</strong>, so we fail to reject the null hypothesis that missingness is independent of match outcome.</p>
+
+<p>Next, we tested whether missingness depends on game length.</p>
+
+<iframe src="assets/missingness_gamelength_perm_test.html" width="100%" height="500"></iframe>
+
+<p>This test produced a <strong>p-value &lt; 0.001</strong>, providing strong evidence that missingness depends on match duration.</p>
+
+<p>Together, these results suggest the missingness of <code class="language-plaintext highlighter-rouge">goldat25</code> is <strong>not Missing Completely At Random (MCAR)</strong> and is more consistent with a <strong>Missing At Random (MAR)</strong> mechanism.</p>
+
+<hr />
+
+<h2 id="hypothesis-testing">Hypothesis Testing</h2>
+
+<h3 id="hypothesis-1--champion-impact">Hypothesis 1 — Champion Impact</h3>
+
+<p>We tested whether the botlane champion <strong>Aphelios</strong> has a win rate different from other botlane champions.</p>
+
+<p><strong>Null hypothesis:</strong> Aphelios’s win rate equals the pooled win rate of other botlane champions.</p>
+
+<p><strong>Alternative hypothesis:</strong> Aphelios’s win rate differs from that of other botlane champions.</p>
+
+<iframe src="assets/aphelios_perm_test.html" width="100%" height="500"></iframe>
+
+<p>The permutation test produced a <strong>p-value of 0.3697</strong>, so we fail to reject the null hypothesis. This suggests that champion selection alone does not strongly explain match outcomes.</p>
+
+<h3 id="hypothesis-2--early-gold-advantage">Hypothesis 2 — Early Gold Advantage</h3>
+
+<p>We tested whether teams with above-median gold difference at 10 minutes win more often.</p>
+
+<p><strong>Null hypothesis:</strong> Teams with above-median <code class="language-plaintext highlighter-rouge">golddiffat10</code> do not have higher win rates.</p>
+
+<p><strong>Alternative hypothesis:</strong> Teams with above-median <code class="language-plaintext highlighter-rouge">golddiffat10</code> win more often.</p>
+
+<iframe src="assets/gold_diff_perm_test.html" width="100%" height="500"></iframe>
+
+<p>The permutation test produced a <strong>p-value &lt; 0.001</strong>, providing strong evidence that early gold advantage is associated with match victory.</p>
+
+<hr />
+
+<h2 id="framing-a-prediction-problem">Framing a Prediction Problem</h2>
+
+<p>We frame the modeling task as <strong>binary classification</strong>.</p>
+
+<p>Each observation represents <strong>one team in one match</strong>, and the model predicts the variable <strong><code class="language-plaintext highlighter-rouge">result</code></strong>.</p>
+
+<p>To avoid leakage, we split the dataset by <strong>game ID</strong>, ensuring that both teams from the same match appear in the same training or testing partition.</p>
+
+<p>Model performance is evaluated using:</p>
+
+<ul>
+  <li><strong>Accuracy</strong></li>
+  <li><strong>ROC-AUC</strong></li>
+</ul>
+
+<hr />
+
+<h2 id="baseline-model">Baseline Model</h2>
+
+<p>Our baseline model is a logistic regression classifier trained using only raw 10-minute team statistics.</p>
+
+<p>Features:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">goldat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">xpat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">csat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">killsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">assistsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">deathsat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">golddiffat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">xpdiffat10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">csdiffat10</code></li>
+</ul>
+
+<p>Baseline performance:</p>
+
+<ul>
+  <li><strong>Accuracy:</strong> 0.7064</li>
+  <li><strong>ROC-AUC:</strong> 0.7641</li>
+</ul>
+
+<p>Even this simple early-match snapshot predicts roughly 70% of match outcomes, indicating substantial predictive signal in early gameplay.</p>
+
+<hr />
+
+<h2 id="final-model">Final Model</h2>
+
+<p>The final model expands the baseline using three additional sources of information.</p>
+
+<p><strong>Engineered features</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kda10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gold_per_cs10</code></li>
+  <li><code class="language-plaintext highlighter-rouge">combat_intensity10</code></li>
+</ul>
+
+<p><strong>Objective control</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">firstblood</code></li>
+  <li><code class="language-plaintext highlighter-rouge">firstdragon</code></li>
+  <li><code class="language-plaintext highlighter-rouge">firstherald</code></li>
+  <li><code class="language-plaintext highlighter-rouge">firstbaron</code></li>
+  <li><code class="language-plaintext highlighter-rouge">firsttower</code></li>
+</ul>
+
+<p><strong>Champion composition</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">top_champ</code></li>
+  <li><code class="language-plaintext highlighter-rouge">jng_champ</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mid_champ</code></li>
+  <li><code class="language-plaintext highlighter-rouge">bot_champ</code></li>
+  <li><code class="language-plaintext highlighter-rouge">sup_champ</code></li>
+</ul>
+
+<p>Best hyperparameters identified through GridSearchCV:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">C = 0.1</code></li>
+  <li><code class="language-plaintext highlighter-rouge">solver = lbfgs</code></li>
+</ul>
+
+<p>Final model performance:</p>
+
+<ul>
+  <li><strong>Accuracy:</strong> 0.8396</li>
+  <li><strong>ROC-AUC:</strong> 0.9061</li>
+</ul>
+
+<p>This represents a substantial improvement over the baseline model.</p>
+
+<hr />
+
+<h2 id="fairness-analysis">Fairness Analysis</h2>
+
+<p>We evaluated whether model performance differs between <strong>blue side</strong> and <strong>red side</strong> teams.</p>
+
+<p>Observed accuracies:</p>
+
+<ul>
+  <li>Blue side: <strong>0.8329</strong></li>
+  <li>Red side: <strong>0.8462</strong></li>
+</ul>
+
+<p>Difference in accuracy:</p>
+
+<ul>
+  <li><strong>−0.0133</strong></li>
+</ul>
+
+<iframe src="assets/fairness_perm_test.html" width="100%" height="500"></iframe>
+
+<p>A permutation test produced a <strong>p-value of 0.2798</strong>, so we fail to reject the null hypothesis that performance differs between sides. The model therefore appears reasonably balanced across blue and red side teams.</p>
+
+<hr />
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Our analysis demonstrates that the early state of a professional League of Legends match contains substantial predictive information about its eventual outcome. Even a simple baseline model trained only on raw 10-minute statistics achieves strong performance, indicating that early economic and combat signals already encode meaningful structure.</p>
+
+<p>However, the strongest predictive performance emerges when we incorporate additional strategic context. Engineered summaries of combat efficiency, indicators of early objective control, and champion composition together provide a richer representation of early-game dynamics.</p>
+
+<p>These results reinforce a widely held competitive intuition. Victories in professional League of Legends rarely emerge from a single decisive moment late in the match. Instead, they typically arise from a sequence of advantages that begin much earlier.</p>
+
+<p><strong>In professional League of Legends, victory rarely begins at the final teamfight — it begins in the quiet accumulation of gold, experience, and map control during the opening minutes of the game.</strong></p>
+
+
+      <footer class="site-footer">
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html>
