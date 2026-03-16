@@ -5,6 +5,8 @@ Tristan Roman · David Lightfoot · Timothy Chang · Julia Klayman
 
 Professional *League of Legends* is a game defined by momentum. Small advantages in gold, experience, and map control during the opening minutes often cascade into larger strategic advantages that determine the outcome of a match. Analysts and commentators frequently claim that games are “decided early,” but this statement is usually made qualitatively rather than supported with systematic evidence.
 
+Professional League of Legends is also one of the most widely viewed esports in the world, with major tournaments drawing millions of concurrent viewers. Because of this massive audience, fans, analysts, and commentators are constantly trying to understand which factors most strongly influence whether a team wins or loses. By analyzing early-match statistics from professional games, our project investigates whether advantages accumulated during the first ten minutes — such as gold, experience, combat efficiency, and objective control — already contain predictive information about eventual match outcomes.
+
 This project investigates that claim quantitatively using professional esports data. Our goal is to determine whether information available early in a match — such as gold, experience, farming efficiency, combat activity, and objective control — already contains enough signal to predict which team will ultimately win.
 
 ---
@@ -31,9 +33,9 @@ Our central research question is:
 
 To investigate this question, we use the **2022 Oracle’s Elixir professional esports dataset**, which contains detailed records of professional matches played across major global leagues.
 
-The raw dataset includes both player-level and team-level rows. For this project, we transform the data so that each observation represents **one team in one match**, allowing us to frame the analysis as a predictive modeling problem.
+The dataset contains **144,780 rows**. Because the raw dataset includes both player-level and team-level rows, we transform the data so that each observation in our modeling table represents **one team in one match**, allowing us to frame the problem as a prediction task centered on team victory.
 
-The response variable is **result**, where:
+The response variable is **`result`**, where:
 
 - 1 = win
 - 0 = loss
@@ -85,6 +87,16 @@ Next, we restricted the dataset to the five competitive roles:
 
 Player rows were then aggregated into team-level observations, ensuring that each match contributes exactly two rows, one per team.
 
+To verify that the cleaning and aggregation steps produced the intended team-level structure, we examine the first few rows of the cleaned dataset.
+
+| Game ID | Side | Result | Gold @10 | XP @10 | CS @10 | Kills @10 | Assists @10 | Deaths @10 | Gold Diff @10 | Bot | Jungle | Mid | Support | Top | First Blood | First Dragon | First Herald | First Baron | First Tower |
+|--------|------|-------|---------|-------|------|---------|-----------|----------|--------------|------|--------|-----|--------|-----|------------|-------------|-------------|------------|------------|
+| ESPORTSTMNT01_2690210 | Blue | 0 | 16218 | 18213 | 322 | 3 | 5 | 0 | 1523 | Samira | Xin Zhao | LeBlanc | Leona | Renekton | 1 | 0 | 1 | 0 | 1 |
+| ESPORTSTMNT01_2690210 | Red | 1 | 14695 | 18076 | 330 | 0 | 0 | 3 | -1523 | Jinx | Viego | Viktor | Alistar | Gragas | 0 | 1 | 0 | 0 | 0 |
+| ESPORTSTMNT01_2690219 | Blue | 0 | 14939 | 17462 | 317 | 1 | 1 | 3 | -1619 | Jhin | Lee Sin | Orianna | Rakan | Gragas | 0 | 0 | 1 | 0 | 0 |
+| ESPORTSTMNT01_2690219 | Red | 1 | 16558 | 19048 | 344 | 3 | 3 | 1 | 1619 | Syndra | Nidalee | Renekton | Leona | Gangplank | 1 | 1 | 0 | 1 | 1 |
+| ESPORTSTMNT01_2690227 | Blue | 1 | 15466 | 19600 | 368 | 0 | 0 | 1 | -103 | Aphelios | Talon | Zoe | Yuumi | Renekton | 0 | 1 | 0 | 1 | 1 |
+
 To capture additional structure in early gameplay, we engineered several derived features:
 
 - `kda10` — early combat efficiency
@@ -129,8 +141,8 @@ To summarize early-match performance numerically, we grouped observations by tea
 
 | Side | Avg Gold @10 | Avg XP @10 | Avg CS @10 | Avg Gold Diff @10 | Avg KDA10 |
 |------|-------------:|-----------:|-----------:|------------------:|----------:|
-| Blue |    15,736.5  |  18,222    |   315.36   |             85.58 |    2.21   |
-| Red  |    15,651    |  18,198.4  |   315.01   |            -85.58 |    2.1    |
+| Blue | 15,736.54 | 18,222.02 | 315.36 | 85.58 | 2.21 |
+| Red  | 15,650.96 | 18,198.40 | 315.01 | -85.58 | 2.10 |
 
 These aggregates complement the visual analysis by providing concise numerical summaries of early-game performance.
 
@@ -168,6 +180,8 @@ We tested whether the botlane champion **Aphelios** has a win rate different fro
 
 **Alternative hypothesis:** Aphelios’s win rate differs from that of other botlane champions.
 
+We chose this test because Aphelios appeared frequently in the cleaned botlane data, which made him a natural candidate for a champion-specific question. Since the comparison is between one champion and the rest of the botlane pool, we used the **absolute difference in win rates** as the test statistic. That statistic directly measures how far Aphelios’s observed performance is from the rest of the field. We use a **significance level of 0.05**, which is a conventional threshold in statistical analysis that balances the risk of false positives with the ability to detect meaningful effects in the data.
+
 <iframe src="assets/aphelios_perm_test.html" width="100%" height="500"></iframe>
 
 The permutation test produced a **p-value of 0.3697**, so we fail to reject the null hypothesis. This suggests that champion selection alone does not strongly explain match outcomes.
@@ -180,6 +194,8 @@ We tested whether teams with above-median gold difference at 10 minutes win more
 
 **Alternative hypothesis:** Teams with above-median `golddiffat10` win more often.
 
+We use the **difference in win rate** as the test statistic because it directly measures whether teams with stronger early gold positions win at a meaningfully different rate than teams without that advantage. This statistic is appropriate for our question since we are asking whether early economic position is associated with eventual victory. We again use a **significance level of 0.05** as the threshold for statistical significance.
+
 <iframe src="assets/gold_diff_perm_test.html" width="100%" height="500"></iframe>
 
 The permutation test produced a **p-value < 0.001**, providing strong evidence that early gold advantage is associated with match victory.
@@ -190,7 +206,7 @@ The permutation test produced a **p-value < 0.001**, providing strong evidence t
 
 We frame the modeling task as **binary classification**.
 
-Each observation represents **one team in one match**, and the model predicts the variable **`result`**.
+Each observation represents **one team in one match**, and the model predicts the variable **`result`**. We chose `result` because the central goal of the project is to determine whether early-match information can predict whether a team ultimately wins or loses.
 
 To avoid leakage, we split the dataset by **game ID**, ensuring that both teams from the same match appear in the same training or testing partition.
 
@@ -198,6 +214,8 @@ Model performance is evaluated using:
 
 - **Accuracy**
 - **ROC-AUC**
+
+We report accuracy because it provides a simple and interpretable measure of the proportion of match outcomes predicted correctly. We also report ROC-AUC because it captures how well the model separates wins from losses across classification thresholds. Since the data are not extremely imbalanced, accuracy is a reasonable primary metric, while ROC-AUC provides an additional view of ranking performance.
 
 ---
 
@@ -216,6 +234,8 @@ Features:
 - `golddiffat10`
 - `xpdiffat10`
 - `csdiffat10`
+
+The baseline feature set contains **9 quantitative variables**, representing early-game numeric statistics such as gold, experience, farming, and combat participation. No ordinal variables are used in this baseline model, and no nominal variables are included because the baseline intentionally restricts the feature set to raw numeric early-match statistics.
 
 Baseline performance:
 
@@ -252,6 +272,10 @@ The final model expands the baseline using three additional sources of informati
 - `bot_champ`
 - `sup_champ`
 
+These added features are useful because they better reflect the way early advantages are generated and converted in professional play. Combat-efficiency features summarize how well teams turn skirmishes into favorable outcomes, objective-control indicators reflect whether early pressure becomes map-wide strategic advantage, and champion composition captures draft structure that can shape how teams create and use early leads. From the perspective of the game’s data-generating process, these features provide a richer representation of how early-match state develops into eventual victory.
+
+The modeling algorithm used for the final model is **logistic regression**. We chose logistic regression because it is well suited for binary classification, produces interpretable coefficients, and provides a strong benchmark for understanding how early-game variables contribute to win probability.
+
 Best hyperparameters identified through GridSearchCV:
 
 - `C = 0.1`
@@ -278,6 +302,10 @@ Observed accuracies:
 Difference in accuracy:
 
 - **−0.0133**
+
+For the fairness analysis, the evaluation metric is **classification accuracy**, measured separately for blue-side and red-side teams. The **null hypothesis** states that the model performs equally well for both groups, meaning any difference in accuracy is due to random variation. The **alternative hypothesis** states that the model performs differently between the two groups.
+
+We use the **difference in accuracy between the two sides** as the test statistic and perform a permutation test to determine whether the observed difference is statistically significant. The significance level is set to **0.05**.
 
 <iframe src="assets/fairness_perm_test.html" width="100%" height="500"></iframe>
 
